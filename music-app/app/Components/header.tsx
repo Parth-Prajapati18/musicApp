@@ -21,7 +21,7 @@ const Navbar: React.FC = () => {
     };
 
     const handleSidebarClick = (e: any) => {
-        e.stopPropagation(); // Prevent the click event from closing the sidebar
+        e.stopPropagation(); 
     };
 
     const handleOutsideClick = () => {
@@ -35,6 +35,7 @@ const Navbar: React.FC = () => {
 
             <div className="flex justify-between items-center">
                 
+                {/* Logo */}
                 <div className="flex items-center">
                     <Link href="/" passHref className="text-white text-2xl font-bold flex items-center">
                         <Image className='text-white' src={logo} alt="Logo" width={120} height={120} />
