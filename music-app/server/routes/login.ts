@@ -35,7 +35,7 @@ router.get('/', async (req: Request, res: Response) => {
     }
 
     //Jwt generation
-    const token = jwt.sing({ username }, process.env.JWT_SECRET, { expiresIn: '1h' } )
+    const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '1h' } )
 
     res.status(200).json({ token, Message : `User '${username}' has successfully logged In` })
 
