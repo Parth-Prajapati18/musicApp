@@ -43,6 +43,8 @@ router.post('/', validateUserInput, async (req: Request, res: Response) => {
     const newUser: User = { username, passwordHash };
     users.push(newUser);
 
+    console.log(users)
+
     res.json({ message : `User '${username}' has been added successfully`})
 })
 

@@ -6,8 +6,10 @@ const app: express.Application = express();
 const port: number = 3000;
 
 app.use((req: Request, res: Response, next) => {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001/');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     next();
 });
 

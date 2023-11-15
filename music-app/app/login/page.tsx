@@ -1,10 +1,13 @@
 "use client"
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useDispatch } from "react-redux";
+import {signIn} from '../redux/features/authSlice'
 
 const SignIn = () => {
 
   const router = useRouter();
+  const dispatch = useDispatch();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -18,6 +21,7 @@ const SignIn = () => {
       if (response.status === 200) {
         const data = await response.json();
         const { token } = data;
+        dispatch(signIn(token));
         console.log(token);
         router.push('/');
       } else if (response.status === 401) {
