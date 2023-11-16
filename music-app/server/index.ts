@@ -2,6 +2,7 @@ import express, { Request, Response }  from 'express';
 import signupRouter from './routes/signup'
 import indexRouter from './routes/index'
 import loginRouter from './routes/login'
+import audiobookRouter from './routes/spotifysongs'
 const app: express.Application = express();
 const port: number = 3000;
 
@@ -17,7 +18,8 @@ app.use(express.json());
 app.use('/', indexRouter)
 app.use('/signup', signupRouter);
 app.use('/login', loginRouter)
- 
+app.use('/audiobook', audiobookRouter )
+
 // Server setup
 app.listen(port, () => {
     console.log(`TypeScript with Express 

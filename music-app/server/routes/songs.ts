@@ -1,4 +1,4 @@
-import express, { Request, Response, Router, response } from 'express';
+import express, { Request, Response, Router } from 'express';
 import dotenv from 'dotenv';
 const jwt =  require('jsonwebtoken');
 

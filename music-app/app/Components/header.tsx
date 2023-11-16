@@ -53,7 +53,7 @@ const Navbar: React.FC = () => {
                             <RxHamburgerMenu />
                         </button>
                     ) : (
-                        <div className="flex space-x-4">
+                        <div className="md:hidden flex space-x-4">
                             <div className='py-1'>
                                 <Link href="/login" passHref className="text-white">
                                     Login
