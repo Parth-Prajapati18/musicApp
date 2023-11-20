@@ -33,7 +33,7 @@ const __getGenres = async (token: string) => {
 
 const __getTracks = async (token: string, id: string) => {
 
-    const result = await fetch(`https://api.spotify.com/v1/playlists/${id}/tracks?limit=10`, {
+    const result = await fetch(`https://api.spotify.com/v1/playlists/${id}/tracks`, {
         method: 'GET', 
         headers: { 'Authorization' : 'Bearer ' + token}
     });
@@ -53,15 +53,27 @@ const __getTrack = async (token: string, trackEndPoint:string) => {
     return data;
 }
 
-
-
 router.get('/', async (req: Request, res: Response) => {
+  try {
+    const token = await __getToken();
+    const tracks = await __getTracks(token, '5GEfF7uYfIy9S2I39FZj4P');
 
-      const token = await __getToken();
-      const track = await __getTrack(token,'https://api.spotify.com/v1/artists/3IR6DvP0x2a6oUSist9UMu')
-      
-      res.json({track})
+    const audiobooks = await Promise.all(tracks.map(async (track: any) => {
+      const trackDetails = await __getTrack(token, track.track.href);
 
-})
+      return {
+        name: trackDetails.name,
+        image: trackDetails.album.images[0]?.url || null,
+        artist: trackDetails.artists[0]?.name || null,
+        songurl: trackDetails.external_urls.spotify || null,
+      };
+    }));
+
+    res.json({ audiobooks });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 export default router;

@@ -21,9 +21,11 @@ export default function RootLayout({ children, }: { children: React.ReactNode })
 
           {/* Large screen */}
           <div className='md:grid grid-cols-6'>
-            <div className='hidden md:block h-screen'>
-              <Navbar />
+            <div className="relative">
+            <div className='hidden md:block h-screen fixed'>
+              <Navbar/>
               <Sidebar />
+            </div>
             </div>
             {/* Mobile */}
             <div className='md:hidden'>
