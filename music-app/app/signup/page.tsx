@@ -1,13 +1,38 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Popup from '../Components/popup';
 
 const SignUp = () => {
 
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
+  const [signupFormReset, setSignupFormReset] = useState(false);
+
+  const handleClosePopup = () => {
+    setShowPopup(false);
+    setSignupFormReset(true);
+  }
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      const popup = document.getElementById('popup');
+
+      if (popup && !popup.contains(event.target as Node)){
+        setShowPopup(false);
+        setSignupFormReset(true);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, []);
 
   const handleSignUp = async () => {
 
@@ -27,7 +52,8 @@ const SignUp = () => {
         router.push('/login');
       } else if (response.status === 400) {
         const data = await response.json();
-        console.log(data.errors);
+        setShowPopup(true);
+        setSignupFormReset(false);      
       }
     } catch (error) {
       console.error('Error signing up:', error);
@@ -67,6 +93,13 @@ const SignUp = () => {
           Sign Up
         </button>
       </div>
+      {showPopup && (
+        <Popup
+          type="warning"
+          message="Popup message for warning"
+          onClose={handleClosePopup}
+        />
+      )}
     </div>
   );
 };
