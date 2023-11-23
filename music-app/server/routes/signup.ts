@@ -61,7 +61,9 @@ const checkuserdb = async (username: string): Promise<boolean> => {
 
         const result = await request.query('SELECT Username FROM Users WHERE Username=@username;');
 
-        return result.recordsets.length !== 0;
+        console.log('User has been VERIFIED')
+
+        return result.rowsAffected[0] !== 0;
 
     } catch (error) {
         console.error(error);

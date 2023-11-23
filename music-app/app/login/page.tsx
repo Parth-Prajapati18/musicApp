@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch } from "react-redux";
-import {signIn} from '../redux/features/authSlice'
+import {signIn} from '../redux/features/authSlice';
+import Popup from '../Components/popup';
 
 const SignIn = () => {
 
@@ -10,9 +11,18 @@ const SignIn = () => {
   const dispatch = useDispatch();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
+  const [msg, setMsg] = useState('')
+  const [msgType, setMsgType] = useState('success')
+
+  const resetPopupState = () => {
+    setShowPopup(false);
+    setMsg('');
+    setMsgType('success');
+  };
 
   const handleSignIn = async () => {
-
+    resetPopupState();
     try {
       const response = await fetch(
         `http://localhost:3000/login?username=${username}&password=${password}`
@@ -27,6 +37,9 @@ const SignIn = () => {
       } else if (response.status === 401) {
         const data = await response.json();
         console.log(data);
+        setMsg(data.message);
+        setShowPopup(true);
+        setMsgType('warning')
       }
     } catch (error) {
       console.log('Error signing in:', error);
@@ -66,6 +79,9 @@ const SignIn = () => {
           Sign In
         </button>
       </div>
+      {
+        showPopup && <Popup type={msgType} message={msg}></Popup>
+      }
     </div>
   );
 };

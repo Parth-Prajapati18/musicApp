@@ -1,26 +1,38 @@
 "use client"
-import React from 'react';
+import React, { useState } from 'react';
+import { useSpring, animated } from 'react-spring';
 
 interface PopupProps {
-  type: 'success' | 'warning';
+  type: string;
   message: string;
-  onClose: () => void;
 }
 
-const Popup: React.FC<PopupProps> = ({ type, message, onClose }) => {
-  const popupClasses = `fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 rounded-md ${
-    type === 'success' ? 'bg-green-500' : 'bg-yellow-500'
-  } text-white`;
+const Popup: React.FC<PopupProps> = ({ type, message }) => {
+  const [visible, setVisible] = useState(true);
+
+  const animationProps = useSpring({
+    opacity: visible ? 1 : 0,
+    transform: visible ? 'translateY(0)' : 'translateY(-50px)',
+  });
+
+  // Close the popup after 3 seconds
+  setTimeout(() => {
+    setVisible(false);
+  }, 2000);
 
   return (
-    <div className={popupClasses}>
-      <button className="absolute top-2 right-2 text-white" onClick={onClose}>
-        Close
-      </button>
-      {type === 'success' && <span className="mr-2">🎉</span>}
-      {type === 'warning' && <span className="mr-2">⚠️</span>}
-      <span>{message}</span>
-    </div>
+    <animated.div
+      style={{
+        ...animationProps,
+        position: 'fixed',
+        top: '30px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+      }}
+      className={`${type === 'success' ? 'bg-green-500' : 'bg-yellow-200'} rounded-md p-4 text-gray-700 font-semibold`}
+    >
+      <div>{message}</div>
+    </animated.div>
   );
 };
 
