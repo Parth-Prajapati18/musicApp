@@ -1,104 +1,75 @@
 import express, { Request, Response, Router } from 'express';
 import dotenv from 'dotenv';
 import { validationResult } from 'express-validator';
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-import sql, { Request as SqlRequest, NVarChar } from 'mssql';
-import config from '../db/db';
+import mysql from 'mysql2/promise';
+import { RowDataPacket } from 'mysql2';
+import pool from '../db/db';
 
 dotenv.config();
 const router: Router = express.Router();
 
-let connection: sql.ConnectionPool;
+const checkCredentialsDB = async (username: string, password: string): Promise<boolean> => {
+    let connection: mysql.PoolConnection | undefined;
 
-const checkCredentialsDB = async (username: any, password: any): Promise<boolean> => {
     try {
-        connection = await sql.connect(config);
-        console.log('SQL has been connected');
+        connection = await pool.getConnection();
+        const query1 = 'SELECT password FROM users WHERE username = ?';
+        const [rows] = await connection.execute(query1, [username]) as unknown as [RowDataPacket[]];
 
-        const request = new SqlRequest(connection);
-        request.input('username', NVarChar, username)
+        if (rows.length === 0) {
+            return false; // User not found
+        }
 
-        const result = await request.query('SELECT Password FROM Users WHERE Username=@username');
-
-        const compare = await bcrypt.compare(password, result.recordset[0].Password);
-
-        console.log(result.recordset[0].Password, password);
-
+        const compare = await bcrypt.compare(password, rows[0].password);
         return compare;
-
     } catch (error) {
         console.error('Error checking credentials:', error);
-        throw new Error('Error checking credentials');
+        throw error; // Or handle the error as needed
     } finally {
         if (connection) {
-            try {
-                await connection.close();
-                console.log('SQL connection has been closed');
-            } catch (closeError) {
-                console.error('Error closing SQL connection:', closeError);
-            }
+            connection.release();
         }
     }
 };
 
-const checkUserDB = async (username: any): Promise<boolean> => {
+const checkUserDB = async (username: string): Promise<boolean> => {
+    let connection: mysql.PoolConnection | undefined;
     try {
-        connection = await sql.connect(config);
-        console.log('SQL has been connected');
-
-        const request = new SqlRequest(connection);
-        request.input('username', NVarChar, username);
-
-        const result = await request.query('SELECT Username FROM Users WHERE Username=@username;');
-
-        console.log('User has been verified');
-
-        return result.rowsAffected[0] !== 0; //Means no Users
+        connection = await pool.getConnection();
+        const [rows] = await connection.execute('SELECT username FROM users WHERE username = ?', [username]) as unknown as [RowDataPacket[]];
+        return rows.length !== 0; // Means user exists
     } catch (error) {
         console.error('Error checking user:', error);
-        throw new Error('Error checking user');
+        throw error; // Or handle the error as needed
     } finally {
         if (connection) {
-            try {
-                await connection.close();
-                console.log('SQL connection has been closed');
-            } catch (closeError) {
-                console.error('Error closing SQL connection:', closeError);
-            }
+            connection.release();
         }
     }
 };
 
 router.get('/', async (req: Request, res: Response) => {
     try {
-        // Error Check for incoming user details
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { username, password } = req.query;
+        const { username, password } = req.query as { username: string; password: string };
 
-        // Find user from the database
         const userExists = await checkUserDB(username);
-
-        // If user doesn't exist, return an informative message
         if (!userExists) {
             return res.status(401).json({ message: `User '${username}' not found` });
         }
 
-        // Password Match
         const passwordMatch = await checkCredentialsDB(username, password);
-
-        // Invalid Password
         if (!passwordMatch) {
             return res.status(401).json({ message: 'Invalid Password' });
         }
 
-        // Jwt generation
         const token = jwt.sign({ username }, process.env.JWT_SECRET as string, { expiresIn: '1h' });
-
         res.status(200).json({ token, message: `User '${username}' has successfully logged in` });
     } catch (error) {
         console.error('Error processing login request:', error);

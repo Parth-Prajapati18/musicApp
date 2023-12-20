@@ -4,6 +4,11 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import axios from 'axios';
+import { MdPlaylistAdd } from "react-icons/md";
+import { AiFillLike, AiFillDislike } from "react-icons/ai";
+import { useSelector } from "react-redux";
+import { RootState } from './redux/store';
+
 
 interface Audiobook {
   name: string;
@@ -12,8 +17,15 @@ interface Audiobook {
   songurl: string;
 }
 
+function addToPlayList(songid, userId, playlistid) {
+
+  
+
+}
+
 const Page: React.FC = () => {
 
+  const isAuthenticated = useSelector((state: RootState) => state.authReducer.isAuthenticated);
   const [audiobooks, setAudiobooks] = useState<Audiobook[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,9 +52,9 @@ const Page: React.FC = () => {
       {loading ? (
         <div className='loading-spinner'></div>
       ) : (
-        <div className='flex flex-wrap'>
+        <div className='flex flex-wrap content-center justify-center'>
           {audiobooks.map((audiobook, index) => (
-            <div key={index} className='m-4 w-full sm:w-1/2 md:w-1/4 lg:w-1/5 xl:w-1/6'>
+            <div key={index} className='m-1 md:m-4 w-full sm:w-1/2 md:w-1/4 lg:w-1/5 xl:w-1/6'>
               <Link href={audiobook.songurl}>
                 <Image
                   src={audiobook.image}
@@ -55,6 +67,16 @@ const Page: React.FC = () => {
                 <p className='text-sm'>{audiobook.name}</p>
                 <p className='text-xs text-gray-500'>{audiobook.artist}</p>
               </Link>
+
+              {
+              isAuthenticated ? 
+              <>
+              <button className='text-gray-500 mr-2'><AiFillLike/></button>
+              <button className='text-gray-500 mr-2'><AiFillDislike/></button>              
+              <button onClick={addToPlayList()} className='text-gray-500'><MdPlaylistAdd/></button>
+              </>
+              : '' }
+
             </div>
           ))}
         </div>
